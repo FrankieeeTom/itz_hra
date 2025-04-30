@@ -60,14 +60,14 @@ set_config_flags(FLAG_VSYNC_HINT)
 init_window(WIN_WIDTH, WIN_HEIGHT, "Dino")
 set_target_fps(60)
 
-background_texture = load_texture("landscape.jpg")
-road_texture = load_texture("road_ref2.jpg")
-collision_texture = load_texture("kolize.png")
-collision2_texture = load_texture("kolize2.png")
+background_texture = load_texture("ref_textures/landscape.jpg")
+road_texture = load_texture("ref_textures/road_ref2.jpg")
+collision_texture = load_texture("ref_textures/kolize.png")
+collision2_texture = load_texture("ref_textures/kolize2.png")
 
-player_left_texture = load_texture("player_left_ref.png")
-player_right_texture = load_texture("player_right_ref.png")
-player_idle_texture = load_texture("player_idle_ref.png")
+player_left_texture = load_texture("ref_textures/player_left_ref.png")
+player_right_texture = load_texture("ref_textures/player_right_ref.png")
+player_idle_texture = load_texture("ref_textures/player_idle_ref.png")
 
 background = Scene(Vector2(BACKGROUND_VEL, 0), Vector2(0, 0), background_texture)
 road = Scene(Vector2(ROAD_VEL, 0), Vector2(0, 750), road_texture)
@@ -84,7 +84,7 @@ player = {
     "x": 850,
     "y": 525,
     "width": 100,
-    "height": 210,
+    "height": 215,
     "texture": player_idle_texture
 }
 
@@ -189,11 +189,10 @@ while not window_should_close():
             platform_top = plat_rect.y
 
             # Horizontální překrytí
-            if (player["x"] + player["width"] > plat_rect.x and
-                player["x"] < plat_rect.x + plat_rect.width):
+            if (player["x"] + player["width"] > plat_rect.x and player["x"] < plat_rect.x + plat_rect.width):
 
                 # Je dostatečně blízko shora
-                if abs(player_bottom - platform_top) <= 20:
+                if abs(player_bottom - platform_top) <= 10:
                     player["y"] = platform_top - player["height"]
                     player_vel = 0
                     is_jumping = False
