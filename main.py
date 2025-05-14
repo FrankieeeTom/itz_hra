@@ -55,6 +55,12 @@ class Collision:
         return Rectangle(self.position.x, self.position.y, self.width, self.height)
 
 
+player_right_idle = load_texture("textures/player_right_idle")
+player_right_frame1 = load_texture("ref_textures/player_right_1_ref")
+player_right_frame2 = load_texture("ref_textures/player_right_2_ref")
+player_right_frame3 = load_texture("ref_textures/player_right_3_ref")
+
+
 # Init
 set_config_flags(FLAG_VSYNC_HINT)
 init_window(WIN_WIDTH, WIN_HEIGHT, "Dino")
@@ -66,8 +72,8 @@ collision_texture = load_texture("ref_textures/kolize.png")
 collision2_texture = load_texture("ref_textures/kolize2.png")
 
 player_left_texture = load_texture("ref_textures/player_left_ref.png")
-player_right_texture = load_texture("ref_textures/player_right_ref.png")
-player_idle_texture = load_texture("ref_textures/player_idle_ref.png")
+player_right_texture = load_texture("textures/player_right_1.png")
+player_idle_texture = load_texture("textures/player_right_idle.png")
 
 background = Scene(Vector2(BACKGROUND_VEL, 0), Vector2(0, 0), background_texture)
 road = Scene(Vector2(ROAD_VEL, 0), Vector2(0, 750), road_texture)
@@ -91,9 +97,12 @@ player = {
 player_vel = 0
 is_jumping = False
 
+player_frame_delay = 0
+
 frame_delay = 0.5
 last_frame_time = time()
-frames = []
+
+
 current_frame = 0
 
 # Main loop
@@ -111,7 +120,8 @@ while not window_should_close():
             for p in platforms:
                 p.velocity.x = ROAD_VEL
 
-            player["texture"] = player_right_texture
+            player["texture"] = player_right_texture 
+            current_frame = 1
             LEVEL_POS += 5
 
         elif is_key_down(KEY_LEFT):
@@ -154,6 +164,7 @@ while not window_should_close():
 
         else:
             player["texture"] = player_idle_texture
+
 
     # Platform movement
     for p in platforms:
@@ -218,8 +229,19 @@ while not window_should_close():
     for p in platforms:
         p.draw()
 
-    draw_texture(player["texture"], int(player["x"]), int(player["y"]), WHITE)
     
+    texture = player["texture"]
+    scale = 0.20  # Half size
+    
+    source_rec = Rectangle(0, 0, texture.width, texture.height)
+    dest_rec = Rectangle(player["x"], player["y"], texture.width * scale, texture.height * scale)
+    origin = Vector2(0, 0)
+    rotation = 0.0
+
+    draw_texture_pro(texture, source_rec, dest_rec, origin, rotation, WHITE)
+ 
+
+
     draw_text(str(LEVEL_POS), 20, 20, 65, WHITE)
     
     end_drawing()
