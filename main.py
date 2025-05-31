@@ -71,9 +71,14 @@ road_texture = load_texture("ref_textures/road_ref2.jpg")
 collision_texture = load_texture("ref_textures/kolize.png")
 collision2_texture = load_texture("ref_textures/kolize2.png")
 
-player_left_texture = load_texture("ref_textures/player_left_ref.png")
-player_right_texture = load_texture("textures/player_right_1.png")
-player_idle_texture = load_texture("textures/player_right_idle.png")
+player_right_jump_texture = load_texture("textures/player_right_jumping.png")
+player_left_jump_texture = load_texture("textures/player_left_jumping.png")
+
+
+
+player_right_idle_texture = load_texture("textures/player_right_idle.png")
+player_left_idle_texture = load_texture("textures/player_left_idle.png")
+
 
 background = Scene(Vector2(BACKGROUND_VEL, 0), Vector2(0, 0), background_texture)
 road = Scene(Vector2(ROAD_VEL, 0), Vector2(0, 750), road_texture)
@@ -91,8 +96,25 @@ player = {
     "y": 525,
     "width": 100,
     "height": 215,
-    "texture": player_idle_texture
+    "texture": player_left_idle_texture
 }
+
+
+
+player_walk_right = [
+    load_texture("textures/player_right_1.png"),
+    load_texture("textures/player_right_2.png"),
+    load_texture("textures/player_right_3.png"),
+]
+
+
+player_walk_left = [
+    load_texture("textures/player_left_1.png"),
+    load_texture("textures/player_left_2.png"),
+    load_texture("textures/player_left_3.png"),
+]
+
+
 
 player_vel = 0
 is_jumping = False
@@ -103,47 +125,99 @@ frame_delay = 0.5
 last_frame_time = time()
 
 
+ANIMATION_SPEED = 0.25
+last_animation_time = 1
+animation_frame = 0
+
+last_idle_frame = load_texture("textures/player_left_idle.png")
+
 current_frame = 0
 
 # Main loop
 while not window_should_close():
     frame_time = get_frame_time()
 
+
     if is_key_pressed(KEY_F11):
         toggle_fullscreen()
 
-    # Hlavní logika LEVEL_POS
     if LEVEL_POS >= 0:
-        if is_key_down(KEY_RIGHT):
-            background.velocity.x = BACKGROUND_VEL
-            road.velocity.x = ROAD_VEL
-            for p in platforms:
-                p.velocity.x = ROAD_VEL
+        if not is_key_pressed(KEY_UP):
+            if is_key_down(KEY_RIGHT):
+                background.velocity.x = BACKGROUND_VEL
+                road.velocity.x = ROAD_VEL
+                for p in platforms:
+                    p.velocity.x = ROAD_VEL
 
-            player["texture"] = player_right_texture 
-            current_frame = 1
-            LEVEL_POS += 5
+                # Animace chůze vpravo
+                if get_time() - last_animation_time > ANIMATION_SPEED:
+                    animation_frame = (animation_frame + 1) % len(player_walk_right)
+                    last_animation_time = get_time()
+                player["texture"] = player_walk_right[animation_frame]
 
-        elif is_key_down(KEY_LEFT):
-            background.velocity.x = -BACKGROUND_VEL
-            road.velocity.x = -ROAD_VEL
-            for p in platforms:
-                p.velocity.x = -ROAD_VEL
+                last_idle_frame = player_right_idle_texture
+                LEVEL_POS += 5
 
-            player["texture"] = player_left_texture
-            LEVEL_POS -= 5
 
+            elif is_key_down(KEY_LEFT):
+                background.velocity.x = -BACKGROUND_VEL
+                road.velocity.x = -ROAD_VEL
+                for p in platforms:
+                    p.velocity.x = -ROAD_VEL
+
+                # Animace chůze vlevo
+                if get_time() - last_animation_time > ANIMATION_SPEED:
+                    animation_frame = (animation_frame + 1) % len(player_walk_left)
+                    last_animation_time = get_time()
+                player["texture"] = player_walk_left[animation_frame]
+
+                last_idle_frame = player_left_idle_texture
+                LEVEL_POS -= 5
+                
+
+            else:
+                background.velocity.x = 0
+                road.velocity.x = 0
+                for p in platforms:
+                    p.velocity.x = 0
+
+                player["texture"] = last_idle_frame
+                animation_frame = 0
+        
         else:
-            background.velocity.x = 0
-            road.velocity.x = 0
-            for p in platforms:
-                p.velocity.x = 0
+            if is_key_down(KEY_RIGHT):
+                background.velocity.x = BACKGROUND_VEL
+                road.velocity.x = ROAD_VEL
+                for p in platforms:
+                    p.velocity.x = ROAD_VEL
 
-            player["texture"] = player_idle_texture
+                last_idle_frame = player_right_jump_texture
+                LEVEL_POS += 5
 
-    if LEVEL_POS <= 0:
+
+            elif is_key_down(KEY_LEFT):
+                background.velocity.x = -BACKGROUND_VEL
+                road.velocity.x = -ROAD_VEL
+                for p in platforms:
+                    p.velocity.x = -ROAD_VEL
+
+                last_idle_frame = player_left_jump_texture
+                LEVEL_POS -= 5
+                
+
+            else:
+                background.velocity.x = 0
+                road.velocity.x = 0
+                for p in platforms:
+                    p.velocity.x = 0
+
+                player["texture"] = last_idle_frame
+                animation_frame = 0
+
+
+    elif LEVEL_POS <= 0:
         if LEVEL_POS <= -150:
-            player["texture"] = player_idle_texture
+            player["texture"] = player_left_idle_texture
             LEVEL_POS = -150
             player["x"] = 50
 
@@ -154,27 +228,39 @@ while not window_should_close():
 
         if is_key_down(KEY_RIGHT):
             player["x"] += 25
-            player["texture"] = player_right_texture
+
+            # Animace chůze vpravo
+            if get_time() - last_animation_time > ANIMATION_SPEED:
+                animation_frame = (animation_frame + 1) % len(player_walk_right)
+                last_animation_time = get_time()
+            player["texture"] = player_walk_right[animation_frame]
+
+            last_idle_frame = player_right_idle_texture
             LEVEL_POS += 5
 
         elif is_key_down(KEY_LEFT):
             player["x"] -= 25
-            player["texture"] = player_left_texture
+
+            # Animace chůze vlevo
+            if get_time() - last_animation_time > ANIMATION_SPEED:
+                animation_frame = (animation_frame + 1) % len(player_walk_left)
+                last_animation_time = get_time()
+            player["texture"] = player_walk_left[animation_frame]
+
+            last_idle_frame = player_left_idle_texture
             LEVEL_POS -= 5
 
         else:
-            player["texture"] = player_idle_texture
+            player["texture"] = last_idle_frame
+            animation_frame = 0  # reset
 
+
+    print(animation_frame)
 
     # Platform movement
     for p in platforms:
         p.update(frame_time)
 
-    # Animace (volitelná)
-    if not is_key_down(KEY_LEFT) and not is_key_down(KEY_RIGHT):
-        if get_time() - last_frame_time >= frame_delay:
-            current_frame = (current_frame + 1) % len(frames) if frames else 0
-            last_frame_time = get_time()
 
     # Skok
     if is_key_pressed(KEY_UP) and not is_jumping:
@@ -250,7 +336,12 @@ while not window_should_close():
 unload_texture(background_texture)
 unload_texture(road_texture)
 unload_texture(collision_texture)
-unload_texture(player_left_texture)
-unload_texture(player_right_texture)
-unload_texture(player_idle_texture)
 close_window()
+
+
+for tex in player_walk_right:
+    unload_texture(tex)
+
+for tex in player_walk_left:
+    unload_texture(tex)
+  
