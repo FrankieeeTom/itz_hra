@@ -100,12 +100,14 @@ player_walk_right = [
     load_texture("textures/player_right_1.png"),
     load_texture("textures/player_right_2.png"),
     load_texture("textures/player_right_3.png"),
+    load_texture("textures/player_right_2.png")
 ]
 
 player_walk_left = [
     load_texture("textures/player_left_1.png"),
     load_texture("textures/player_left_2.png"),
     load_texture("textures/player_left_3.png"),
+    load_texture("textures/player_left_2.png"),
 ]
 
 player_vel = 0
